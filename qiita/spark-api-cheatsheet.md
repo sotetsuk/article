@@ -1,9 +1,9 @@
 <!-- Spark API -->
 
 # 目的
-Sparkのよく使うAPIを（主に自分用に）メモしておくことで、久しぶりに開発するときでもサクサク使えるようにしたい。とりあえずPython版をまとめる。
+Sparkのよく使うAPIを（主に自分用に）メモしておくことで、久しぶりに開発するときでもサクサク使えるようにしたい。とりあえずPython版をまとめておきます（Scalaも時間があれば加筆するかも）
 
-**このチートシートはあくまでチートシート**なので（引数が省略してあったりします）、きちんとしたものを知りたいのであれば[公式APIドキュメント(Spark Python API Docs)](http://spark.apache.org/docs/latest/api/python/index.html)を見て下さい。
+**このチートシートはあくまでチートシート**なので（引数が省略してあったりします）、時間がある方はきちんと[公式APIドキュメント(Spark Python API Docs)](http://spark.apache.org/docs/latest/api/python/index.html)を見て下さい。
 
 # Spark API チートシート（Python）
 
@@ -460,7 +460,7 @@ RDDと同じ```collect```, ```take```の他に```show``` がある
 
 ##### select
 
-```select(column)``` stringかColumnオブジェクトを渡してselectしたDataFrameを返す。カラムを列挙して複数列取得することもできる。
+```select(column)``` stringかColumnオブジェクトを渡してselectしたDataFrameを返す。カラムを列挙して複数列取得したり、演算することもできる。
 
 
 ```py
@@ -476,6 +476,17 @@ RDDと同じ```collect```, ```take```の他に```show``` がある
 # 次も同じ
 >>> df.select(df.age).show() # Columnオブジェクトを渡す
 >>> df.select(df["age"]).show() # Columnオブジェクトを渡す
+```
+
+```py
+>>> df.select(df.name, df.age).show()
++----+---+
+|name|age|
++----+---+
+| Ken| 35|
+| Bob| 30|
+| Meg| 29|
++----+---+
 ```
 
 ###### DataframeのColumnオブジェクト
@@ -549,13 +560,25 @@ Column<age>
 - how: ```"inner"```, ```"outer"```, ```"left_outer"```, ```"right_outer"```, ```"leftsemi"``` のいずれか
 
 ### DataframeからRDDへ変換
+DataFrameはRDD上に構築されているので、元となるRDDを取り出すことができる
 
+```py
+>>> print(df.rdd.collect())
+[Row(age=35, name=u'Ken', weight=None),
+ Row(age=30, name=u'Bob', weight=80),
+ Row(age=29, name=u'Meg', weight=45)]
+```
+
+特定の列だけ取り出すには```Row```オブジェクトの対応する属性にアクセスする
+
+```py
+df.rdd.map(lambda row: (row.age, row.weight)).collect()
+[(35, None), (30, 80), (29, 45)]
+```
 
 
 ### Dataframeを保存する
 
-##### saveAsParquetFile
-##### saveAsTable
 ##### toJson
 
 ```toJson()``` jsonの形でRDDに変換する。このあと```saveAsTextFile```を呼べばjson形式で保存できる。
@@ -571,7 +594,6 @@ Column<age>
 | 29| Meg|    45|
 +---+----+------+
 ```
-
 
 # 今後
 Spark StreamingやMllib関連もこちらに追記していくかもしれない。
